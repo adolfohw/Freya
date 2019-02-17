@@ -36,8 +36,14 @@ Installing python packages required:
 pip install -r requirements.txt
 ```
 
-Creating a secret file with the bot's token:
+Creating a secret.py file with the bot's token:
 
 ```sh
 echo "TOKEN = 'token here'" > secret.py
+```
+
+To generate Firebase credentials, go to Project > Settings > Service Accounts > Generate new private key, and:
+
+```sh
+echo "json file contents" > firebase/credentials.json
 ```

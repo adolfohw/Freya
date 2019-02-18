@@ -19,7 +19,7 @@ class Mod:
 		return ctx.author.permissions_in(ctx.channel).ban_members
 
 	async def __error(self, ctx, err):
-		await ctx.send('Insufficient permission')
+		await ctx.send('❌ Insufficient permission')
 		raise err
 	
 	@cmd.command()

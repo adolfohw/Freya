@@ -7,5 +7,12 @@ cred = credentials.Certificate('./firebase/credentials.json')
 app = firebase_admin.initialize_app(cred)
 db = firestore.client(app)
 
+guildsinfo = {}
+
 def set_prefix(guild: int, prefix: str):
-	db.collection(u'guilds').document(guild).set({u'prefix': prefix.encode()}, merge=True)
+	guild = str(guild)
+	db.collection('guilds').document(guild).set({'prefix': prefix}, merge=True)
+	if guild not in guildsinfo:
+		guildsinfo[guild] = {'prefix': prefix}
+	else:
+		guildsinfo[guild]['prefix'] = prefix

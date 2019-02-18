@@ -58,13 +58,13 @@ class Mod:
 			else:
 				reason = ' '.join(args[1:])
 		await member.add_roles(muted, reason=reason.capitalize())
-		await member.send(f'\\🙊 {ctx.author.display_name} muted you in {ctx.guild.name} for{time} for {reason}')
-		await ctx.send(f'\\🙊 Muted {member.mention} for{time} for {reason}')
+		await member.send(f'🙊 {ctx.author.display_name} muted you in {ctx.guild.name} for{time} for {reason}')
+		await ctx.send(f'🙊 Muted {member.mention} for{time} for {reason}')
 		if wait:
 			await asyncio.sleep(wait)
 			if muted in member.roles:
 				await member.remove_roles(muted, reason='Punishment time elapsed')
-				await member.send(f'\\🎉 You are free to speak in {ctx.guild.name} again!')
+				await member.send(f'🎉 You are free to speak in {ctx.guild.name} again!')
 	
 	@cmd.command()
 	async def unmute(self, ctx, member):
@@ -79,8 +79,20 @@ class Mod:
 		muted = discord.utils.get(ctx.guild.roles, name='Muted')
 		if muted and muted in member.roles:
 			await member.remove_roles(muted)
-			await member.send(f'\\🎉 {ctx.author.display_name} unmuted you in {ctx.guild.name}')
-			await ctx.send(f'\\👉 {member.mention} has been unmuted')
+			await member.send(f'🎉 {ctx.author.display_name} unmuted you in {ctx.guild.name}')
+			await ctx.send(f'👉 {member.mention} has been unmuted')
+	
+	@cmd.command()
+	async def kick(self, ctx, *args):
+		pass
+	
+	@cmd.command()
+	async def ban(self, ctx, *args):
+		pass
+	
+	@cmd.command()
+	async def unban(self, ctx, *args):
+		pass
 
 def setup(bot):
 	bot.add_cog(Mod(bot))

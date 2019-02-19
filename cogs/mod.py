@@ -138,7 +138,6 @@ class Mod:
 		``Reason`` (optional) will be displayed in the audit log and relayed to the banned member (if possible)"""
 		
 		try:
-			# user = await cmd.UserConverter().convert(ctx, args[0])
 			for _, banned in await ctx.guild.bans():
 				if args[0] in (
 					banned.mention,

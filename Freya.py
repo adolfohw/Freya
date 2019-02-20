@@ -9,8 +9,8 @@ from secret import TOKEN
 def get_prefix(bot, msg):
 	guild = str(msg.guild.id)
 	if guild in guildsinfo:
-		return (guildsinfo[guild]['prefix'], 'f!')
-	return ('!', 'f!')
+		return (guildsinfo[guild]['prefix'], 'f/')
+	return ('!', 'f/')
 
 bot = discordcmd.Bot(get_prefix)
 

@@ -13,6 +13,22 @@ def set_prefix(guild: int, prefix: str):
 	guild = str(guild)
 	db.collection('guilds').document(guild).set({'prefix': prefix}, merge=True)
 	if guild not in guildsinfo:
-		guildsinfo[guild] = {'prefix': prefix}
-	else:
-		guildsinfo[guild]['prefix'] = prefix
+		guildsinfo[guild] = {}
+	guildsinfo[guild]['prefix'] = prefix
+
+def add_reaction_role(guild: int, msg: int, emoji, role: int):
+	guild = str(guild)
+	msg = str(msg)
+	emoji = str(emoji)
+	role = str(role)
+	guild_db = db.collection('guilds').document(guild)
+	guild_db.collection('reaction_roles').document(msg).set({
+		emoji: role
+	}, merge=True)
+	if guild not in guildsinfo:
+		guildsinfo[guild] = {}
+	if 'reaction_roles' not in guildsinfo[guild]:
+		guildsinfo[guild]['reaction_roles'] = {}
+	if msg not in guildsinfo[guild]['reaction_roles']:
+		guildsinfo[guild]['reaction_roles'][msg] = {}
+	guildsinfo[guild]['reaction_roles'][msg][emoji] = role	

@@ -6,6 +6,18 @@ import discord.ext.commands as discordcmd
 from firebase import db, guildsinfo
 from secret import TOKEN
 
+# All IDs are integers in the form of strings 
+# guildsinfo = {
+# 	'guild_id': {
+# 		'prefix': str,
+# 		'reaction_roles': {
+# 			'msg_id': {
+# 				'unicode_emoji_or_emoji_id': 'role_id'
+# 			}
+# 		}
+# 	}
+# }
+
 def get_prefix(bot, msg):
 	guild = str(msg.guild.id)
 	if guild in guildsinfo:
@@ -46,8 +58,13 @@ async def on_guild_channel_create(channel):
 async def on_ready():
 	guilds = db.collection('guilds').get()
 	for guild in guilds:
-		guildsinfo[guild.id] = guild.to_dict()
-	print(f'Freya online!')
+		try:
+			guildsinfo[guild.id] = guild.to_dict()
+			reaction_roles = guild.reference.collection('reaction_roles').get()
+			guildsinfo[guild.id]['reaction_roles'] = {msg.id: msg.to_dict() for msg in reaction_roles}
+		except:
+			pass
+	print(f'Freya online!\nServing {len(bot.guilds)} guilds.')
 
 if __name__ == '__main__':
 	for cog in os.listdir('./cogs'):

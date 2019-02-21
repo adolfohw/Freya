@@ -4,50 +4,45 @@ import discord
 from discord.ext import commands as cmd
 from firebase import add_reaction_role, guildsinfo
 
+
+
 class Roles:
 	def __init__(self, bot):
 		self.bot = bot
-	
+
+	async def get_reaction_parameters(self, rawreaction):
+		msg_id = str(rawreaction.message_id)
+		guild = self.bot.get_guild(rawreaction.guild_id)
+		guild_id = str(rawreaction.guild_id)
+		if guild_id in guildsinfo and msg_id in guildsinfo[guild_id]['reaction_roles']:
+			emoji = rawreaction.emoji
+			if emoji.is_custom_emoji():
+				emoji = str(emoji.id)
+			else:
+				emoji = emoji.name
+			role = guild.get_role(int(guildsinfo[guild_id]['reaction_roles'][msg_id][emoji]))
+			member = guild.get_member(rawreaction.user_id)
+			channel = guild.get_channel(rawreaction.channel_id)
+			msg = await channel.get_message(rawreaction.message_id)
+			
+			return member, role, msg
+
 	async def __local_check(self, ctx):
 		return ctx.author.permissions_in(ctx.channel).administrator
 		
 	async def on_raw_reaction_add(self, rawreaction):
-		msg_id = str(rawreaction.message_id)
-		guild = self.bot.get_guild(rawreaction.guild_id)
-		guild_id = str(rawreaction.guild_id)
-		if guild_id in guildsinfo and msg_id in guildsinfo[guild_id]['reaction_roles']:
-			emoji = rawreaction.emoji
-			if emoji.is_custom_emoji():
-				emoji = str(emoji.id)
-			else:
-				emoji = emoji.name
-			role = guild.get_role(int(guildsinfo[guild_id]['reaction_roles'][msg_id][emoji]))
-			member = guild.get_member(rawreaction.user_id)
-			channel = guild.get_channel(rawreaction.channel_id)
-			msg = await channel.get_message(rawreaction.message_id)
-			await member.add_roles(
-				role,
-				reason=f'Reacted to "{shorten(msg.content, 40, placeholder="...")}" in #{channel.name} with {str(rawreaction.emoji.name)}'
-			)
+		member, role, msg = await self.get_reaction_parameters(rawreaction)
+		await member.add_roles(
+			role,
+			reason=f'Reacted to "{shorten(msg.content, 40, placeholder="...")}" in #{msg.channel.name} with {str(rawreaction.emoji.name)}'
+		)
 	
 	async def on_raw_reaction_remove(self, rawreaction):
-		msg_id = str(rawreaction.message_id)
-		guild = self.bot.get_guild(rawreaction.guild_id)
-		guild_id = str(rawreaction.guild_id)
-		if guild_id in guildsinfo and msg_id in guildsinfo[guild_id]['reaction_roles']:
-			emoji = rawreaction.emoji
-			if emoji.is_custom_emoji():
-				emoji = str(emoji.id)
-			else:
-				emoji = emoji.name
-			role = guild.get_role(int(guildsinfo[guild_id]['reaction_roles'][msg_id][emoji]))
-			member = guild.get_member(rawreaction.user_id)
-			channel = guild.get_channel(rawreaction.channel_id)
-			msg = await channel.get_message(rawreaction.message_id)
-			await member.remove_roles(
-				role,
-				reason=f'Removed {str(rawreaction.emoji.name)} reaction to "{shorten(msg.content, 40, placeholder="...")}" in #{channel.name}'
-			)
+		member, role, msg = await self.get_reaction_parameters(rawreaction)
+		await member.remove_roles(
+			role,
+			reason=f'Removed {str(rawreaction.emoji.name)} reaction to "{shorten(msg.content, 40, placeholder="...")}" in #{msg.channel.name}'
+		)
 
 	async def on_ready(self):
 		for guild_id in guildsinfo:
@@ -136,6 +131,10 @@ class Roles:
 						pass
 		add_reaction_role(ctx.guild.id, msg.id, emoji if isinstance(emoji, str) else emoji.id , role.id)
 		await ctx.send(f'🎭 Reacting to "{shorten(msg.content, 40, placeholder="...")}" with {str(emoji)} will now grant the {role.name} role to members')
+
+	@cmd.command()
+	async def stopwatching(self, ctx, msg_id: int):
+		pass
 
 def setup(bot):
 	bot.add_cog(Roles(bot))

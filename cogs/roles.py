@@ -2,9 +2,7 @@ from textwrap import shorten
 
 import discord
 from discord.ext import commands as cmd
-from firebase import add_reaction_role, guildsinfo
-
-
+from firebase import add_reaction_role, guildsinfo, stop_watching_message
 
 class Roles:
 	def __init__(self, bot):
@@ -20,7 +18,10 @@ class Roles:
 				emoji = str(emoji.id)
 			else:
 				emoji = emoji.name
-			role = guild.get_role(int(guildsinfo[guild_id]['reaction_roles'][msg_id][emoji]))
+			try:
+				role = guild.get_role(int(guildsinfo[guild_id]['reaction_roles'][msg_id][emoji]))
+			except:
+				raise KeyError
 			member = guild.get_member(rawreaction.user_id)
 			channel = guild.get_channel(rawreaction.channel_id)
 			msg = await channel.get_message(rawreaction.message_id)
@@ -31,14 +32,20 @@ class Roles:
 		return ctx.author.permissions_in(ctx.channel).administrator
 		
 	async def on_raw_reaction_add(self, rawreaction):
-		member, role, msg = await self.get_reaction_parameters(rawreaction)
+		try:
+			member, role, msg = await self.get_reaction_parameters(rawreaction)
+		except:
+			return
 		await member.add_roles(
 			role,
 			reason=f'Reacted to "{shorten(msg.content, 40, placeholder="...")}" in #{msg.channel.name} with {str(rawreaction.emoji.name)}'
 		)
 	
 	async def on_raw_reaction_remove(self, rawreaction):
-		member, role, msg = await self.get_reaction_parameters(rawreaction)
+		try:
+			member, role, msg = await self.get_reaction_parameters(rawreaction)
+		except:
+			return
 		await member.remove_roles(
 			role,
 			reason=f'Removed {str(rawreaction.emoji.name)} reaction to "{shorten(msg.content, 40, placeholder="...")}" in #{msg.channel.name}'
@@ -92,15 +99,15 @@ class Roles:
 						)
 
 	@cmd.command()
-	async def reactionrole(self, ctx, msg_id: int, emoji, role: cmd.RoleConverter):
-		"""Usage: ``!reactionrole <MsgID> <Emoji> <Role>``
+	async def startwatching(self, ctx, msg_id: int, emoji, role: cmd.RoleConverter):
+		"""Usage: ``!startwatching <MsgID> <Emoji> <Role>``
 
 		``MsgID`` can be acquired by enabling Developer Mode in User Settings > Appearance, and right-clicking a message and selecting Copy ID;
 		``Emoji`` can be either a unicode emoji or a server's custom emoji;
 		``Role`` can be any reference to a role, e.g., @valkyrie, valkyrie"""
 		
 		if role.managed:
-			await ctx.send(f'🙅‍ Sorry, but {role.name} is managed by an integration and cannot be assigned')
+			await ctx.send(f'🙅‍ Sorry, but {role.name} is managed by an integration, so I cannot assign it to members')
 			return
 		for channel in ctx.guild.text_channels:
 			try:
@@ -109,7 +116,7 @@ class Roles:
 			except:
 				pass
 		else:
-			ctx.send(ctx.command.help)
+			await ctx.send(ctx.command.help)
 			return
 
 		# Custom emoji
@@ -133,8 +140,78 @@ class Roles:
 		await ctx.send(f'🎭 Reacting to "{shorten(msg.content, 40, placeholder="...")}" with {str(emoji)} will now grant the {role.name} role to members')
 
 	@cmd.command()
-	async def stopwatching(self, ctx, msg_id: int):
-		pass
+	async def listmessages(self, ctx):
+		placeholder = await ctx.send('🔎 Looking for messages...')
+		try:
+			msgs = guildsinfo[str(ctx.guild.id)]['reaction_roles']
+			if not msgs:
+				raise KeyError
+		except:
+			await placeholder.edit(content='✨ No messages are being watched', delete_after=3)
+			return
+		msg_list = '🕵️‍ Watching the following messages:\n\n'
+		not_found = False
+		unwatch_msgs = False
+		for msg_id in msgs:
+			for channel in ctx.guild.text_channels:
+				try:
+					msg = await channel.get_message(int(msg_id))
+					break
+				except:
+					pass
+			else:
+				unwatch_msgs = True
+				stop_watching_message(ctx.guild.id, msg)
+				continue
+			reaction_roles = []
+			for raw_emoji, role in msgs[msg_id].items():
+				if len(raw_emoji) > 1:
+					emoji = self.bot.get_emoji(int(raw_emoji))
+					if not emoji:
+						try:
+							emoji = await cmd.PartialEmojiConverter().convert(ctx, raw_emoji)
+							emoji = str(emoji)
+						except:
+							emoji = '??'
+				else:
+					emoji = raw_emoji
+				try:
+					role = await cmd.RoleConverter().convert(ctx, role)
+				except:
+					role = '??'
+				if '??' in (emoji, role):
+					not_found = True
+				reaction_roles.append(f'{str(emoji)} > {str(role)}')
+			msg_list += f'**{msg_id}** - "{shorten(msg.content, 120, placeholder="...")}"\n{"; ".join(reaction_roles)}\n\n'
+		if not_found:
+			msg_list += '❗ If an emoji or role appears as ??, it means it is no longer visible to me, and I cannot properly manage that role.\n\n'
+		if unwatch_msgs:
+			msg_list += '🤷‍ Some messages appear to have been deleted, so I stopped watching them'
+		await placeholder.edit(content=msg_list.strip())
+
+	@cmd.command()
+	async def stopwatching(self, ctx, msg_id: str):
+		"""Usage: ``!stopwatching <MsgID or `all`>``
+		
+		``MsgID`` can be acquired by enabling Developer Mode in User Settings > Appearance, and right-clicking a message and selecting Copy ID;
+		If ``all`` is passed instead, I will stop watching all messages"""
+
+		guild_id = str(ctx.guild.id)
+		if msg_id == 'all':
+			try:
+				stop_watching_message(guild_id, all_msgs=True)
+				await ctx.send('👉 Stopped watching all messages')
+			except KeyError:
+				await ctx.send('🙇‍ Something happened and some messages are still being watched')
+		else:
+			try:
+				if not msg_id in guildsinfo[guild_id]['reaction_roles']:
+					raise KeyError
+			except:
+				await ctx.send('🙅‍ I am not watching that message')
+				return
+			stop_watching_message(guild_id, msg_id)
+			await ctx.send(f'👉 Stopped watching message **{msg_id}**')
 
 def setup(bot):
 	bot.add_cog(Roles(bot))

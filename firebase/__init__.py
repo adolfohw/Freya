@@ -31,4 +31,20 @@ def add_reaction_role(guild: int, msg: int, emoji, role: int):
 		guildsinfo[guild]['reaction_roles'] = {}
 	if msg not in guildsinfo[guild]['reaction_roles']:
 		guildsinfo[guild]['reaction_roles'][msg] = {}
-	guildsinfo[guild]['reaction_roles'][msg][emoji] = role	
+	guildsinfo[guild]['reaction_roles'][msg][emoji] = role
+
+def stop_watching_message(guild: int, msg='', all_msgs=False):
+	guild = str(guild)
+	msg = str(msg)
+	try:
+		guild_db = db.collection('guilds').document(guild)
+		if all_msgs:
+			docs = guild_db.collection('reaction_roles').get()
+			for doc in docs:
+				del guildsinfo[guild]['reaction_roles'][doc.id]
+				doc.reference.delete()
+			return
+		guild_db.collection('reaction_roles').document(msg).delete()
+		del guildsinfo[guild]['reaction_roles'][msg]
+	except:
+		raise KeyError

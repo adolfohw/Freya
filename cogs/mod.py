@@ -15,8 +15,8 @@ async def deny_muted(channel):
 	muted = discord.utils.get(channel.guild.roles, name='Muted')
 	await channel.set_permissions(
 		muted,
+		reason='Stop Muted members from posting and reacting',
 		add_reactions=False,
-		read_messages=True,
 		send_messages=False,
 		send_tts_messages=False,
 	)
@@ -41,7 +41,6 @@ class Mod:
 			await guild.create_role(
 				name='Muted',
 				color=discord.Color(0x36393f),
-				mentionable=True,
 				reason='Role used to stop members from posting in every channel'
 			)
 			channels = guild.text_channels
@@ -66,7 +65,6 @@ class Mod:
 			muted = await ctx.guild.create_role(
 				name='Muted',
 				color=discord.Color(0x36393f),
-				mentionable=True,
 				reason='Asked to mute without having a Muted role'
 			)
 		elif muted in member.roles:

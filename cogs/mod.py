@@ -29,7 +29,9 @@ class Mod:
 		return ctx.author.permissions_in(ctx.channel).ban_members
 
 	async def __error(self, ctx, err):
-		await ctx.send('🤚 You do not have permission to do that')
+		msg = await ctx.send('🤚 You do not have permission to do that')
+		asyncio.sleep(3)
+		await msg.delete()
 		raise err
 
 	async def on_guild_channel_create(self, channel):

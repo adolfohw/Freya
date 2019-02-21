@@ -1,3 +1,5 @@
+import asyncio
+
 from discord.ext import commands as cmd
 from firebase import guildsinfo, set_prefix
 
@@ -9,7 +11,9 @@ class Admin:
 		return ctx.author.permissions_in(ctx.channel).administrator
 	
 	async def __error(self, ctx, err):
-		ctx.send('🤚 You do not have permission to do that')
+		msg = await ctx.send('🤚 You do not have permission to do that')
+		asyncio.sleep(3)
+		await msg.delete()
 		raise err
 
 	@cmd.command()

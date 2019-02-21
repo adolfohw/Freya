@@ -1,6 +1,5 @@
 from textwrap import shorten
 
-import discord
 from discord.ext import commands as cmd
 from firebase import add_reaction_role, guildsinfo, stop_watching_message
 

@@ -11,6 +11,16 @@ time_mod = {
 	's': 1
 }
 
+async def deny_muted(channel):
+	muted = discord.utils.get(channel.guild.roles, name='Muted')
+	await channel.set_permissions(
+		muted,
+		add_reactions=False,
+		read_messages=True,
+		send_messages=False,
+		send_tts_messages=False,
+	)
+
 class Mod:
 	def __init__(self, bot):
 		self.bot = bot
@@ -21,7 +31,23 @@ class Mod:
 	async def __error(self, ctx, err):
 		await ctx.send('🤚 You do not have permission to do that')
 		raise err
-	
+
+	async def on_guild_channel_create(self, channel):
+		if discord.utils.get(channel.guild.roles, name='Muted'):
+			await deny_muted(channel)	
+
+	async def on_guild_join(self, guild):
+		if discord.utils.get(guild.roles, name='Muted') is None:
+			await guild.create_role(
+				name='Muted',
+				color=discord.Color(0x36393f),
+				mentionable=True,
+				reason='Role used to stop members from posting in every channel'
+			)
+			channels = guild.text_channels
+			for channel in channels:
+				await deny_muted(channel)
+
 	@cmd.command()
 	async def mute(self, ctx, *args):
 		"""Usage: ``!mute <Member> (Time) (Reason)``

@@ -9,7 +9,7 @@ class Admin:
 		return ctx.author.permissions_in(ctx.channel).administrator
 	
 	async def __error(self, ctx, err):
-		ctx.send('❌ Insufficient permission')
+		ctx.send('🤚 You do not have permission to do that')
 		raise err
 
 	@cmd.command()

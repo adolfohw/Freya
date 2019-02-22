@@ -12,7 +12,6 @@ class Admin:
 	async def prefix(self, ctx, arg):
 		"""Usage: ``!prefix <Prefix>``
 
-		``Prefix`` can be anything other than /
 		Every command can always be invoked with ``f/``"""
 		
 		cur_prefix = guildsinfo[str(ctx.guild.id)]['prefix'] if str(ctx.guild.id) in guildsinfo else '!'

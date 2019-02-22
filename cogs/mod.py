@@ -164,15 +164,34 @@ class Mod:
 
 	@cmd.command()
 	async def clean(self, ctx, n: int):
+		"""Usage: ``!clean <Number>``
+
+		``Number`` is the number of messages to be deleted from this channel
+		Do not include the command in the number, it is already taken into consideration"""
+		
+		await ctx.channel.purge(limit=n + 1)
+		await ctx.send(f'👉 {n} messages were removed', delete_after=3)
+	
+	@cmd.command()
+	async def squelch(self, ctx, member: cmd.MemberConverter):
 		pass
 	
 	@cmd.command()
-	async def squelch(self, member: cmd.MemberConverter):
+	async def unsquelch(self, ctx, member: cmd.MemberConverter):
 		pass
-	
+
 	@cmd.command()
-	async def unsquelch(self, member: cmd.MemberConverter):
-		pass
+	async def slowmode(self, ctx, time):
+		"""Usage: ``!slowmode <Time or `off`>``
+
+		``Time`` is the number of seconds members must wait before sending messages, 0 or ``off`` turns off slowmode"""
+		
+		if time == 'off' or int(time) == 0:
+			ctx.channel.slowmode_delay = 0
+			await ctx.send('🐇 Slowmode is off')
+		else:
+			ctx.channel.slowmode_delay = int(time)
+			await ctx.send('🐢 This channel is now on slowmode')
 
 def setup(bot):
 	bot.add_cog(Mod(bot))

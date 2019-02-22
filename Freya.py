@@ -1,7 +1,7 @@
 import os
 
 import discord
-import discord.ext.commands as discordcmd
+import discord.ext.commands as cmd
 
 from firebase import db, guildsinfo
 from secret import TOKEN
@@ -27,7 +27,15 @@ def get_prefix(bot, msg):
 			pass
 	return ('!', 'f/')
 
-bot = discordcmd.Bot(get_prefix)
+bot = cmd.Bot(get_prefix)
+
+@bot.event
+async def on_command_error(ctx, err):
+	if isinstance(err, cmd.CheckFailure):
+		await ctx.message.delete()
+		await ctx.send('🤚 You do not have permission to do that', delete_after=3)
+	else:
+		await ctx.send(ctx.command.help)
 
 @bot.event
 async def on_ready():

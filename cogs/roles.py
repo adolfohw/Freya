@@ -115,16 +115,11 @@ class Roles:
 			except:
 				pass
 		else:
-			await ctx.send(ctx.command.help)
-			return
+			raise Exception('Message not found')
 
 		# Custom emoji
 		if len(emoji) > 1:
-			try:
-				emoji = await cmd.EmojiConverter().convert(ctx, emoji)
-			except:
-				await ctx.send(ctx.command.help)
-				return
+			emoji = await cmd.EmojiConverter().convert(ctx, emoji)
 		for reaction in msg.reactions:
 			if reaction.emoji == emoji:
 				async for member in reaction.users():

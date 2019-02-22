@@ -28,10 +28,6 @@ class Mod:
 	async def __local_check(self, ctx):
 		return ctx.author.permissions_in(ctx.channel).ban_members
 
-	async def __error(self, ctx, err):
-		await ctx.send('🤚 You do not have permission to do that', delete_after=3)
-		raise err
-
 	async def on_guild_channel_create(self, channel):
 		if discord.utils.get(channel.guild.roles, name='Muted'):
 			await deny_muted(channel)	
@@ -55,11 +51,7 @@ class Mod:
 		``Time`` (optional) can be any number followed by d, h, m, s or nothing (defaults to s);
 		``Reason`` (optional) will be displayed in the audit log and relayed to the muted member"""
 
-		try:
-			member = await cmd.MemberConverter().convert(ctx, args[0])
-		except:
-			await ctx.send(ctx.command.help)
-			return
+		member = await cmd.MemberConverter().convert(ctx, args[0])
 		muted = discord.utils.get(ctx.guild.roles, name='Muted')
 		if muted is None:
 			muted = await ctx.guild.create_role(
@@ -99,11 +91,7 @@ class Mod:
 		``Member`` can be a mention or any reference to a member, e.g., @John, John#1234, or John;
 		``Reason`` (optional) will be displayed in the audit log and relayed to the muted member"""
 
-		try:
-			member = await cmd.MemberConverter().convert(ctx, args[0])
-		except:
-			await ctx.send(ctx.command.help)
-			return
+		member = await cmd.MemberConverter().convert(ctx, args[0])
 		muted = discord.utils.get(ctx.guild.roles, name='Muted')
 		if muted and muted in member.roles:
 			reason = 'no reason'
@@ -121,11 +109,7 @@ class Mod:
 		``Member`` can be a mention or any reference to a member, e.g., @John, John#1234, or John;
 		``Reason`` (optional) will be displayed in the audit log and relayed to the kicked member"""
 		
-		try:
-			member = await cmd.MemberConverter().convert(ctx, args[0])
-		except:
-			await ctx.send(ctx.command.help)
-			return
+		member = await cmd.MemberConverter().convert(ctx, args[0])
 		reason = 'no reason'
 		if len(args) > 1:
 			reason = ' '.join(args[1:])
@@ -141,11 +125,7 @@ class Mod:
 		``Member`` can be a mention or any reference to a member, e.g., @John, John#1234, or John;
 		``Reason`` (optional) will be displayed in the audit log and relayed to the banned member"""
 		
-		try:
-			member = await cmd.MemberConverter().convert(ctx, args[0])
-		except:
-			await ctx.send(ctx.command.help)
-			return
+		member = await cmd.MemberConverter().convert(ctx, args[0])
 		reason = 'no reason'
 		if len(args) > 1:
 			reason = ' '.join(args[1:])
@@ -161,20 +141,16 @@ class Mod:
 		``User`` can be a mention or any reference to a user, e.g., @John, John#1234, or John;
 		``Reason`` (optional) will be displayed in the audit log and relayed to the banned member (if possible)"""
 		
-		try:
-			for _, banned in await ctx.guild.bans():
-				if args[0] in (
-					banned.mention,
-					banned.id, 
-					banned.name, 
-					f'{banned.name}#{banned.discriminator}',
-					banned.display_name
-				):
-					user = banned
-					break
-		except:
-			await ctx.send(ctx.command.help)
-			return
+		for _, banned in await ctx.guild.bans():
+			if args[0] in (
+				banned.mention,
+				banned.id, 
+				banned.name, 
+				f'{banned.name}#{banned.discriminator}',
+				banned.display_name
+			):
+				user = banned
+				break
 		reason = 'no reason'
 		if len(args) > 1:
 			reason = ' '.join(args[1:])
@@ -185,6 +161,18 @@ class Mod:
 		finally:
 			await ctx.guild.unban(user, reason=reason.capitalize())
 			await ctx.send(f'👉 {user.display_name} has been unbanned for {reason}')
+
+	@cmd.command()
+	async def clean(self, ctx, n: int):
+		pass
+	
+	@cmd.command()
+	async def squelch(self, member: cmd.MemberConverter):
+		pass
+	
+	@cmd.command()
+	async def unsquelch(self, member: cmd.MemberConverter):
+		pass
 
 def setup(bot):
 	bot.add_cog(Mod(bot))

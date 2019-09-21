@@ -27,9 +27,10 @@ class Roles(cmd.Cog):
 			
 			return member, role, msg
 
-	async def __local_check(self, ctx):
+	async def cog_check(ctx):
 		return ctx.author.permissions_in(ctx.channel).administrator
-		
+	
+	@cmd.Cog.listener()
 	async def on_raw_reaction_add(self, rawreaction):
 		try:
 			member, role, msg = await self.get_reaction_parameters(rawreaction)
@@ -40,6 +41,7 @@ class Roles(cmd.Cog):
 			reason=f'Reacted to "{shorten(msg.content, 40, placeholder="...")}" in #{msg.channel.name} with {str(rawreaction.emoji.name)}'
 		)
 	
+	@cmd.Cog.listener()
 	async def on_raw_reaction_remove(self, rawreaction):
 		try:
 			member, role, msg = await self.get_reaction_parameters(rawreaction)
@@ -50,6 +52,7 @@ class Roles(cmd.Cog):
 			reason=f'Removed {str(rawreaction.emoji.name)} reaction to "{shorten(msg.content, 40, placeholder="...")}" in #{msg.channel.name}'
 		)
 
+	@cmd.Cog.listener()
 	async def on_ready(self):
 		for guild_id in guildsinfo:
 			guild = self.bot.get_guild(int(guild_id))

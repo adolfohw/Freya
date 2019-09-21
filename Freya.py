@@ -47,7 +47,8 @@ async def on_ready():
 			guildsinfo[guild.id]['reaction_roles'] = {msg.id: msg.to_dict() for msg in reaction_roles}
 		except:
 			pass
-	print(f'Freya online!\nServing {len(bot.guilds)} guilds.')
+	n_guilds = len(bot.guilds)
+	print(f'Freya online!\nServing {n_guilds} guild{"s" if n_guilds != 1 else ""}.')
 
 if __name__ == '__main__':
 	for cog in os.listdir('./cogs'):

@@ -25,18 +25,20 @@ class Mod(cmd.Cog):
 	def __init__(self, bot):
 		self.bot = bot
 	
-	async def __local_check(self, ctx):
+	async def cog_check(ctx):
 		return ctx.author.permissions_in(ctx.channel).ban_members
 
+	@cmd.Cog.listener()
 	async def on_guild_channel_create(self, channel):
 		if discord.utils.get(channel.guild.roles, name='Muted'):
 			await deny_muted(channel)	
 
+	@cmd.Cog.listener()
 	async def on_guild_join(self, guild):
 		if discord.utils.get(guild.roles, name='Muted') is None:
 			await guild.create_role(
 				name='Muted',
-				color=discord.Color(0x36393f),
+				color=discord.Color(0x36393F),
 				reason='Role used to stop members from posting in every channel'
 			)
 			channels = guild.text_channels
@@ -172,13 +174,13 @@ class Mod(cmd.Cog):
 		await ctx.channel.purge(limit=n + 1)
 		await ctx.send(f'👉 {n} messages were removed', delete_after=3)
 	
-	@cmd.command()
-	async def squelch(self, ctx, member: cmd.MemberConverter):
-		pass
+	# @cmd.command()
+	# async def squelch(self, ctx, member: cmd.MemberConverter):
+	# 	pass
 	
-	@cmd.command()
-	async def unsquelch(self, ctx, member: cmd.MemberConverter):
-		pass
+	# @cmd.command()
+	# async def unsquelch(self, ctx, member: cmd.MemberConverter):
+	# 	pass
 
 	@cmd.command()
 	async def slowmode(self, ctx, time):
@@ -187,11 +189,11 @@ class Mod(cmd.Cog):
 		``Time`` is the number of seconds members must wait before sending messages, 0 or ``off`` turns off slowmode"""
 		
 		if time == 'off' or int(time) == 0:
-			ctx.channel.slowmode_delay = 0
+			await ctx.channel.edit(slowmode_delay=0)
 			await ctx.send('🐇 Slowmode is off')
 		else:
-			ctx.channel.slowmode_delay = int(time)
-			await ctx.send('🐢 This channel is now on slowmode')
+			await ctx.channel.edit(slowmode_delay=int(time))
+			await ctx.send('🐢 This channel is now in slowmode')
 
 def setup(bot):
 	bot.add_cog(Mod(bot))

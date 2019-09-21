@@ -5,7 +5,7 @@ class Admin(cmd.Cog):
 	def __init__(self, bot):
 		self.bot = bot
 	
-	async def cog_check(ctx):
+	async def cog_check(self, ctx):
 		return ctx.author.permissions_in(ctx.channel).administrator
 
 	@cmd.command()

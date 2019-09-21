@@ -27,7 +27,7 @@ class Roles(cmd.Cog):
 			
 			return member, role, msg
 
-	async def cog_check(ctx):
+	async def cog_check(self, ctx):
 		return ctx.author.permissions_in(ctx.channel).administrator
 	
 	@cmd.Cog.listener()

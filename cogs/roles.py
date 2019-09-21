@@ -3,7 +3,7 @@ from textwrap import shorten
 from discord.ext import commands as cmd
 from firebase import add_reaction_role, guildsinfo, stop_watching_message
 
-class Roles:
+class Roles(cmd.Cog):
 	def __init__(self, bot):
 		self.bot = bot
 

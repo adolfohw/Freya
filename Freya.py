@@ -39,11 +39,11 @@ async def on_command_error(ctx, err):
 
 @bot.event
 async def on_ready():
-	guilds = db.collection('guilds').get()
+	guilds = db.collection('guilds').stream()
 	for guild in guilds:
 		try:
 			guildsinfo[guild.id] = guild.to_dict()
-			reaction_roles = guild.reference.collection('reaction_roles').get()
+			reaction_roles = guild.reference.collection('reaction_roles').stream()
 			guildsinfo[guild.id]['reaction_roles'] = {msg.id: msg.to_dict() for msg in reaction_roles}
 		except:
 			pass

@@ -1,7 +1,7 @@
 from discord.ext import commands as cmd
 from firebase import guildsinfo, set_prefix
 
-class Admin:
+class Admin(cmd.Cog):
 	def __init__(self, bot):
 		self.bot = bot
 	

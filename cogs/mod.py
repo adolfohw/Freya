@@ -21,7 +21,7 @@ async def deny_muted(channel):
 		send_tts_messages=False,
 	)
 
-class Mod:
+class Mod(cmd.Cog):
 	def __init__(self, bot):
 		self.bot = bot
 	

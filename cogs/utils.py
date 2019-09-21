@@ -12,7 +12,7 @@ time_mod = {
 	's': 1
 }
 
-class Utils:
+class Utils(cmd.Cog):
 	def __init__(self, bot):
 		self.bot = bot
 	

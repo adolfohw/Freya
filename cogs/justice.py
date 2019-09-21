@@ -33,7 +33,9 @@ class Justice(cmd.Cog):
 		"""No rest for the wicked"""
 
 		member = await ExtendedMemberConverter().convert(ctx, args[0])
-		await ctx.send(f':omine::Whip: {member.mention}')
+		omine = self.bot.get_emoji(593528157991075859)
+		whip = self.bot.get_emoji(485925920721338378)
+		await ctx.send(f'{omine}{whip} {member.mention}')
 
 def setup(bot):
 	bot.add_cog(Justice(bot))
